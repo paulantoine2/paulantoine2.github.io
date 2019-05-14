@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Instagram Preview</title>
+    <link href="https://fonts.googleapis.com/css?family=Rubik" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <style>
+        * {
+            font-family: 'Rubik', sans-serif;
+        }
+        #mockup {
+            background: url('./iphoneX_mockup3.png') no-repeat;
+            background-position: center;
+            background-size: 100%;
+            height: 820px;
+            width: 700px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: -100px;
+        }
+        #grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-content: flex-start;
+            width: 351px;
+            height: 611px;
+            overflow-x: hidden;
+            overflow-y: scroll;
+            position: relative;
+            margin-top: 4px;
+            margin-left: -1px;
+        }
+        #container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #grid .img-container {
+            width: calc(348px / 3);
+            height: calc(348px / 3);
+            margin-left: 1px;
+            margin-bottom: 1px;
+            cursor: pointer;
+            position: relative;
+        }
+        #grid .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform .15s cubic-bezier(.3,.6,.63,1.64);
+        }
+        #grid .img-container:hover img {
+            transform: scale(0.9);
+        }
+        #drop {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        #drop div {
+            font-size: 20px;
+            border: solid 3px black;
+            border-radius: 6px;
+            padding: 10px;
+            font-weight: 600;
+            animation: dropEnter .3s cubic-bezier(.3,.6,.63,1.64);
+            transition: transform .15s cubic-bezier(.3,.6,.63,1.64);
+        }
+        #drop:hover div {
+            transform: scale(1.3);
+        }
+        .remove {
+            display: none;
+            position: absolute;
+            right: 2px;
+            top: 2px;
+            z-index: 10;
+            cursor: pointer;
+            background: #fff;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: transform .15s cubic-bezier(.3,.6,.63,1.64);
+        }
+        .remove:hover {
+            transform: scale(1.2);
+        }
+        .img-container:hover .remove {
+            display: block;
+        }
+        .icon {
+            background: #fff;
+            border-radius: 50%;
+            color: #000;
+            position: absolute;
+            z-index: 10;
+            width: 50px;
+            height: 50px;
+            left: 33px;
+            top: 33px;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            cursor: pointer;
+            transition: transform .15s cubic-bezier(.3,.6,.63,1.64);
+            transform: scale(1);
+        }
+        .img-container:hover .icon {
+            display: flex;
+            transform: scale(1.1);
+        }
+        @keyframes dropEnter {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        h1, h2 {
+            margin: 0;
+        }
+        h1 {
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #555;
+        }
+        form {
+            display: none;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+</head>
+<body>
+<div id="container">
+    <div id="mockup">
+        <div id="grid">
+            <div id="drop"><div>Drop or choose pictures</div></div>
+        </div>
+    </div>
+    <div id="right">
+        <h1>Instagram Preview</h1>
+        <h2>For desktop</h2>
+        <p>We do not store your file, simply preview your feed.</p>
+    </div>
+</div>
+<form id="form1" runat="server">
+    <input type='file' id="imgInp" multiple />
+</form>
+<script>
+  $grid = $('#grid');
+  $drop = $('#drop');
+  $input = $('#imgInp');
+
+  function processFiles(input) {
+    console.log(input.files);
+    if (input.files) {
+      for (const file of input.files) {
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+          resizedataURL(e.target.result, 500, function(src) {
+            var img = $('<div class="img-container"><img src="'+src+'" /><div class="icon"><i class="fas fa-arrows-alt"></i></div></div>');
+            var remove_btn = $('<button class="remove"><i class="far fa-trash-alt"></i></button>');
+            remove_btn.on('click', function() {
+              $(this).parent('.img-container').remove();
+            });
+            img.find('.icon').on('mousedown', function() {
+              $(this).siblings('.remove').css('display', 'none');
+            });
+            img.find('.icon').on('mouseup', function() {
+              $(this).siblings('.remove').removeAttr('style');
+            });
+            img.prepend(remove_btn);
+            $grid.prepend(img);
+          })
+        };
+
+        reader.readAsDataURL(file);
+      }
+      if (input.files.length) {
+        $drop.hide();
+      }
+    }
+  }
+
+  function resizedataURL(datas, wantedWidth, callback)
+  {
+    // We create an image to receive the Data URI
+    var img = document.createElement('img');
+
+    // When the event "onload" is triggered we can resize the image.
+    img.onload = function()
+    {
+      // We create a canvas and get its context.
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext('2d');
+
+      // We set the dimensions at the wanted size.
+      var height = wantedWidth * this.height / this.width;
+      canvas.width = wantedWidth;
+      canvas.height = height;
+
+      // We resize the image with the canvas method drawImage();
+      ctx.drawImage(this, 0, 0, wantedWidth, height);
+
+      var dataURI = canvas.toDataURL();
+
+      callback(dataURI);
+    };
+
+    // We put the Data URI in the image's src attribute
+    img.src = datas;
+  }
+
+
+  $input.on('change', function(){
+    processFiles(this);
+    $grid.sortable();
+    $grid.disableSelection();
+  });
+
+  $drop.on('drop', function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    processFiles(event.dataTransfer);
+  });
+  $drop.on('click', function(e) {
+    $input.click();
+  })
+</script>
+</body>
+</html>
