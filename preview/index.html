@@ -37,7 +37,7 @@
             align-items: center;
             justify-content: center;
         }
-        #grid .img-container {
+        #grid .img-container, .img-container + #drop {
             width: calc(348px / 3);
             height: calc(348px / 3);
             margin-left: 1px;
@@ -74,6 +74,20 @@
         }
         #drop:hover div {
             transform: scale(1.3);
+        }
+        #drop .small {
+            display: none;
+        }
+        .img-container + #drop .small {
+            display: block;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            line-height: 50px;
+            font-size: 40px;
+        }
+        .img-container + #drop .big {
+            display: none;
         }
         .remove {
             display: none;
@@ -148,7 +162,10 @@
 <div id="container">
     <div id="mockup">
         <div id="grid">
-            <div id="drop"><div>Drop or choose pictures</div></div>
+            <div id="drop">
+                <div class="big">+ Choose pictures</div>
+                <div class="small">+</div>
+            </div>
         </div>
     </div>
     <div id="right">
@@ -191,9 +208,9 @@
 
         reader.readAsDataURL(file);
       }
-      if (input.files.length) {
-        $drop.hide();
-      }
+      // if (input.files.length) {
+      //   $drop.hide();
+      // }
     }
   }
 
